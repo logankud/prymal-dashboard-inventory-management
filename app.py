@@ -2,7 +2,6 @@ from dash import Dash, callback, html, dcc
 import dash_bootstrap_components as dbc
 import numpy as np
 import pandas as pd
-import matplotlib as mpl
 import dash
 from dash import dcc
 from dash import html
