@@ -112,14 +112,34 @@ def run_athena_query(query:str, database: str, region:str):
         # Handle any other unexpected exceptions
 
 
-# FUNCTION TO GENERATE LINE CHART (QTY SOLD PER DAY) FOR A SELECTED PRODUCT
-# ----------
+
+
+
+# ========================================================================
+# Execute Code
+# ========================================================================
+
+
+# Initialize Dash app
+app = dash.Dash(__name__)
+
+# QUery product options from Glue database
+PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
+                'Cacao Mocha - Large Bag (320 g)',
+                'Original - Large Bag (320 g)',
+                'Vanilla Bean - Large Bag (320 g)',
+                'Butter Pecan - Large Bag (320 g)',
+                'Cinnamon Dolce - Large Bag (320 g)']
 
 # Define callback to update the line chart based on product selection
 @app.callback(
     Output('line-chart', 'figure'),
     Input('product-dropdown', 'value')
 )
+
+# FUNCTION TO GENERATE LINE CHART (QTY SOLD PER DAY) FOR A SELECTED PRODUCT
+# ----------
+
 def generate_new_line_chart(selected_product:str):
 
     DATABASE = 'prymal-analytics'
@@ -148,22 +168,6 @@ def generate_new_line_chart(selected_product:str):
 
     return figure
 
-# ========================================================================
-# Execute Code
-# ========================================================================
-
-
-# Initialize Dash app
-app = dash.Dash(__name__)
-
-# QUery product options from Glue database
-PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
-                'Cacao Mocha - Large Bag (320 g)',
-                'Original - Large Bag (320 g)',
-                'Vanilla Bean - Large Bag (320 g)',
-                'Butter Pecan - Large Bag (320 g)',
-                'Cinnamon Dolce - Large Bag (320 g)']
-
 # Define layout
 app.layout = html.Div([
     dcc.Dropdown(
@@ -174,8 +178,6 @@ app.layout = html.Div([
     dcc.Graph(id='line-chart',
               figure=generate_new_line_chart())
 ])
-
-
 
 
 if __name__ == '__main__':
