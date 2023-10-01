@@ -5,5 +5,4 @@ gunicorn==20.0.4
 loguru
 boto3
 botocore
-plotly.express
-plotly.graph_objects
+plotly
