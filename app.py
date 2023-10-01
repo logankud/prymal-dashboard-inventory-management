@@ -115,6 +115,11 @@ def run_athena_query(query:str, database: str, region:str):
 # FUNCTION TO GENERATE LINE CHART (QTY SOLD PER DAY) FOR A SELECTED PRODUCT
 # ----------
 
+# Define callback to update the line chart based on product selection
+@app.callback(
+    Output('line-chart', 'figure'),
+    Input('product-dropdown', 'value')
+)
 def generate_new_line_chart(selected_product:str):
 
     DATABASE = 'prymal-analytics'
@@ -170,11 +175,7 @@ app.layout = html.Div([
               figure=generate_new_line_chart())
 ])
 
-# Define callback to update the line chart based on product selection
-@app.callback(
-    Output('line-chart', 'figure'),
-    Input('product-dropdown', 'value')
-)
+
 
 
 if __name__ == '__main__':
