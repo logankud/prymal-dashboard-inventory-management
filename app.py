@@ -6,9 +6,13 @@ import dash
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
+import gunicorn 
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
+
+# Reference the underlying flask app (Used by gunicorn webserver in Heroku production deployment)
+server = app.server 
 
 # Define the layout of the app
 app.layout = html.Div([
@@ -27,4 +31,4 @@ def update_output(value):
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False, host='0.0.0.0', port=8050)
