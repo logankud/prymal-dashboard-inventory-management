@@ -134,6 +134,17 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
                 'Butter Pecan - Large Bag (320 g)',
                 'Cinnamon Dolce - Large Bag (320 g)']
 
+# Define layout
+app.layout = html.Div([
+    dcc.Dropdown(
+        id='product-dropdown',
+        options=[{'label': product, 'value': product} for product in PRODUCT_LIST],
+        value=PRODUCT_LIST[0]
+    ),
+    dcc.Graph(id='line-chart',
+              figure=None)
+])
+
 # Define callback to update the line chart based on product selection
 @app.callback(
     Output('line-chart', 'figure'),
@@ -172,16 +183,7 @@ def generate_new_line_chart(selected_product:str):
 
     return fig
 
-# Define layout
-app.layout = html.Div([
-    dcc.Dropdown(
-        id='product-dropdown',
-        options=[{'label': product, 'value': product} for product in PRODUCT_LIST],
-        value=PRODUCT_LIST[0]
-    ),
-    dcc.Graph(id='line-chart',
-              figure=None)
-])
+
 
 
 if __name__ == '__main__':
