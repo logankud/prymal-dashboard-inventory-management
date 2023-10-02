@@ -123,6 +123,9 @@ def run_athena_query(query:str, database: str, region:str):
 # Initialize Dash app
 app = dash.Dash(__name__)
 
+# Reference the underlying flask app (Used by gunicorn webserver in Heroku production deployment)
+server = app.server 
+
 # QUery product options from Glue database
 PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
                 'Cacao Mocha - Large Bag (320 g)',
