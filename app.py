@@ -136,19 +136,18 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
 
 # Define layout
 app.layout = html.Div([
-    dcc.Dropdown(
-        id='product-dropdown',
-        options=[{'label': product, 'value': product} for product in PRODUCT_LIST],
-        value=PRODUCT_LIST[0]
-    ),
-    dcc.Graph(id='line-chart',
-              figure=None)
+    dcc.Dropdown(PRODUCT_LIST, 
+                 PRODUCT_LIST[0], 
+                 id='product-dropdown'
+                 ),
+    # dcc.Graph(id='line-chart',
+    # figure=fig )
 ])
 
 # Define callback to update the line chart based on product selection
 @app.callback(
     Output('line-chart', 'figure'),
-    Input('product-dropdown', 'value')
+    Input('product-dropdown', 'selected_product')
 )
 
 # FUNCTION TO GENERATE LINE CHART (QTY SOLD PER DAY) FOR A SELECTED PRODUCT
@@ -176,12 +175,12 @@ def generate_new_line_chart(selected_product:str):
 
     
     # Create the line chart figure
-    fig = px.line(result_df,
+    figure = px.line(result_df,
                      x='order_date',
                      y='qty_sold',
                      title=f'Total Qty Sold - {selected_product}')
 
-    return fig
+    return figure
 
 
 
