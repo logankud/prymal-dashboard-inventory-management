@@ -80,6 +80,8 @@ def run_athena_query(query:str, database: str, region:str):
 
         df = pd.DataFrame(data)
 
+        logger.info(df.head())
+
         return df
 
 
@@ -142,7 +144,7 @@ QUERY = f"""SELECT order_date
 # ----
 
 result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
-logger.info(result_df)
+logger.info(result_df.head())
 
 # Initialize Dash app
 # ----
