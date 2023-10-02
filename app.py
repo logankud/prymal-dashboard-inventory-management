@@ -135,6 +135,13 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
                 'Butter Pecan - Large Bag (320 g)',
                 'Cinnamon Dolce - Large Bag (320 g)']
 
+
+# Blank plotly fig
+fig = {
+            'data': [],  # Empty data list
+            'layout': go.Layout()  # Empty layout
+        }
+
 # Define layout
 app.layout = html.Div([
     dcc.Dropdown(PRODUCT_LIST, 
@@ -142,10 +149,7 @@ app.layout = html.Div([
                  id='product-dropdown'
                  ),
     dcc.Graph(id='line-chart',
-    figure={
-            'data': [],  # Empty data list
-            'layout': go.Layout()  # Empty layout
-        }
+    figure=fig
           )
 ])
 
@@ -154,11 +158,9 @@ app.layout = html.Div([
     Output('line-chart', 'fig'),
     Input('product-dropdown', 'selected_product')
 )
+def generate_new_line_chart(selected_product):
 
-# FUNCTION TO GENERATE LINE CHART (QTY SOLD PER DAY) FOR A SELECTED PRODUCT
-# ----------
-
-def generate_new_line_chart(selected_product:str):
+    print(selected_product)
 
     DATABASE = 'prymal-analytics'
     REGION = 'us-east-1'
