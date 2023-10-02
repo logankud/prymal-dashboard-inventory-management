@@ -13,6 +13,7 @@ import loguru
 from loguru import logger
 import os
 import plotly.express as px
+import plotly.graph_objects as go
 
 # ---------------------------------------
 # FUNCTIONS
@@ -141,7 +142,11 @@ app.layout = html.Div([
                  id='product-dropdown'
                  ),
     dcc.Graph(id='line-chart',
-    figure=fig )
+    figure={
+            'data': [],  # Empty data list
+            'layout': go.Layout()  # Empty layout
+        }
+          )
 ])
 
 # Define callback to update the line chart based on product selection
