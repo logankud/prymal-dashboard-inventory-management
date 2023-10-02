@@ -153,7 +153,8 @@ def generate_new_line_chart(selected_product:str):
                 WHERE sku_name = '{selected_product}' 
                 GROUP BY order_date
                 , sku_name
-                ORDER BY order_date ASC"""
+                ORDER BY order_date ASC
+                """
 
 
     result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
@@ -161,12 +162,12 @@ def generate_new_line_chart(selected_product:str):
 
     
     # Create the line chart figure
-    figure = px.line(result_df,
+    fig = px.line(result_df,
                      x='order_date',
                      y='qty_sold',
                      title=f'Total Qty Sold - {selected_product}')
 
-    return figure
+    return fig
 
 # Define layout
 app.layout = html.Div([
@@ -176,7 +177,7 @@ app.layout = html.Div([
         value=PRODUCT_LIST[0]
     ),
     dcc.Graph(id='line-chart',
-              figure=generate_new_line_chart())
+              figure=None)
 ])
 
 
