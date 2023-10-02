@@ -120,14 +120,40 @@ def run_athena_query(query:str, database: str, region:str):
 # Execute Code
 # ========================================================================
 
+DATABASE = 'prymal-analytics'
+REGION = 'us-east-1'
+
+# Construct query to pull data by product
+# ----
+
+QUERY = f"""SELECT order_date
+            , sku_name
+            , SUM(qty_sold) as qty_sold 
+            FROM shopify_qty_sold_by_sku_daily 
+            GROUP BY order_date
+            , sku_name
+            ORDER BY order_date ASC
+            """
+
+# Query datalake
+# ----
+
+result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
+
 
 # Initialize Dash app
+# ----
+
 app = dash.Dash(__name__)
 
 # Reference the underlying flask app (Used by gunicorn webserver in Heroku production deployment)
+# ----
+
 server = app.server 
 
 # QUery product options from Glue database
+# ----
+
 PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
                 'Cacao Mocha - Large Bag (320 g)',
                 'Original - Large Bag (320 g)',
@@ -136,11 +162,16 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
                 'Cinnamon Dolce - Large Bag (320 g)']
 
 
-# Blank plotly fig
-fig = {
-            'data': [],  # Empty data list
-            'layout': go.Layout()  # Empty layout
-        }
+# Initialize plot
+# ----
+
+filtered_df = result_df.loc[result_df['sku_name']==PRODUCT_LIST[0]]
+     
+# Create the plotly line chart
+fig = px.line(filtered_df,
+                    x='order_date',
+                    y='qty_sold',
+                    title=f'Total Qty Sold - {PRODUCT_LIST[0]}')
 
 # Define layout
 app.layout = html.Div([
@@ -160,35 +191,24 @@ app.layout = html.Div([
 )
 def generate_new_line_chart(selected_product):
 
-    print(selected_product)
-
-    DATABASE = 'prymal-analytics'
-    REGION = 'us-east-1'
-
-    # Construct query to pull selected product's data
-    QUERY = f"""SELECT order_date
-                , sku_name
-                , SUM(qty_sold) as qty_sold 
-                FROM shopify_qty_sold_by_sku_daily 
-                WHERE sku_name = '{selected_product}' 
-                GROUP BY order_date
-                , sku_name
-                ORDER BY order_date ASC
-                """
-
-
-    result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
-
-
+    filtered_df = result_df.loc[result_df['sku_name']==selected_product]
+     
+    # Create the plotly line chart
+    fig = px.line(filtered_df,
+                        x='order_date',
+                        y='qty_sold',
+                        title=f'Total Qty Sold - {selected_product}')
     
-    # Create the line chart figure
-    fig = px.line(result_df,
-                     x='order_date',
-                     y='qty_sold',
-                     title=f'Total Qty Sold - {selected_product}')
+
 
     return fig
 
+
+
+    
+
+
+    
 
 
 
