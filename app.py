@@ -43,27 +43,25 @@ def run_athena_query(query:str, database: str, region:str):
             }
         )
 
-        # state = 'RUNNING'
-
-        # while (state in ['RUNNING', 'QUEUED']):
-        #     response = athena_client.get_query_execution(QueryExecutionId = query_execution_id)
-        #     logger.info(f'Query is in {state} state..')
-        #     if 'QueryExecution' in response and 'Status' in response['QueryExecution'] and 'State' in response['QueryExecution']['Status']:
-        #         # Get currentstate
-        #         state = response['QueryExecution']['Status']['State']
-
-        #         if state == 'FAILED':
-        #             logger.error('Query Failed!')
-        #             return False
-        #         elif state == 'SUCCEEDED':
-        #             logger.info('Query Succeeded!')
-        #             return True
-                
-        # Wait for the query to complete
         query_execution_id = response['QueryExecutionId']
-        athena_client.get_waiter('query_execution_completed').wait(
-            QueryExecutionId=query_execution_id
-        )
+
+        # Wait for the query to complete
+        state = 'RUNNING'
+
+        while (state in ['RUNNING', 'QUEUED']):
+            response = athena_client.get_query_execution(QueryExecutionId = query_execution_id)
+            logger.info(f'Query is in {state} state..')
+            if 'QueryExecution' in response and 'Status' in response['QueryExecution'] and 'State' in response['QueryExecution']['Status']:
+                # Get currentstate
+                state = response['QueryExecution']['Status']['State']
+
+                if state == 'FAILED':
+                    logger.error('Query Failed!')
+                    return False
+                elif state == 'SUCCEEDED':
+                    logger.info('Query Succeeded!')
+                    return True
+            
 
         # Retrieve the results
         results_response = athena_client.get_query_results(
