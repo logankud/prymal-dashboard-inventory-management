@@ -43,41 +43,46 @@ def run_athena_query(query:str, database: str, region:str):
             }
         )
 
-        query_execution_id = response['QueryExecutionId']
-        logger.info(f"Query submitted. Execution ID: {query_execution_id}")
+        # state = 'RUNNING'
 
+        # while (state in ['RUNNING', 'QUEUED']):
+        #     response = athena_client.get_query_execution(QueryExecutionId = query_execution_id)
+        #     logger.info(f'Query is in {state} state..')
+        #     if 'QueryExecution' in response and 'Status' in response['QueryExecution'] and 'State' in response['QueryExecution']['Status']:
+        #         # Get currentstate
+        #         state = response['QueryExecution']['Status']['State']
 
-        state = 'RUNNING'
-
-        while (state in ['RUNNING', 'QUEUED']):
-            response = athena_client.get_query_execution(QueryExecutionId = query_execution_id)
-            logger.info(f'Query is in {state} state..')
-            if 'QueryExecution' in response and 'Status' in response['QueryExecution'] and 'State' in response['QueryExecution']['Status']:
-                # Get currentstate
-                state = response['QueryExecution']['Status']['State']
-
-                if state == 'FAILED':
-                    logger.error('Query Failed!')
-                    return False
-                elif state == 'SUCCEEDED':
-                    logger.info('Query Succeeded!')
-                    return True
+        #         if state == 'FAILED':
+        #             logger.error('Query Failed!')
+        #             return False
+        #         elif state == 'SUCCEEDED':
+        #             logger.info('Query Succeeded!')
+        #             return True
                 
-        # Retrieve the query results from S3
-        query_results_location = response['ResultConfiguration']['OutputLocation']
+        # Wait for the query to complete
+        query_execution_id = response['QueryExecutionId']
+        athena_client.get_waiter('query_execution_completed').wait(
+            QueryExecutionId=query_execution_id
+        )
 
-        s3 = boto3.client('s3',
-                        region_name=region,
-                        aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
-                        aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'])
-        
+        # Retrieve the results
+        results_response = athena_client.get_query_results(
+            QueryExecutionId=query_execution_id
+        )
 
-        query_results = s3.get_object(Bucket=query_results_location.split('/')[2], Key='/'.join(query_results_location.split('/')[3:]))
-        query_results_body = query_results['Body']
+        # Convert the results to a Pandas DataFrame
+        column_info = results_response['ResultSet']['ResultSetMetadata']['ColumnInfo']
+        column_names = [info['Name'] for info in column_info]
+        rows = results_response['ResultSet']['Rows'][1:]  # Skip the header row
 
-        logger.info(query_results_body)
+        data = []
+        for row in rows:
+            values = [field['VarCharValue'] for field in row['Data']]
+            data.append(dict(zip(column_names, values)))
 
-        return query_results_body
+        df = pd.DataFrame(data)
+
+        return df
 
 
     except ParamValidationError as e:
@@ -139,7 +144,7 @@ QUERY = f"""SELECT order_date
 # ----
 
 result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
-
+logger.info(result_df)
 
 # Initialize Dash app
 # ----
@@ -166,6 +171,7 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
 # ----
 
 filtered_df = result_df.loc[result_df['sku_name']==PRODUCT_LIST[0]]
+
      
 # Create the plotly line chart
 fig = px.line(filtered_df,
