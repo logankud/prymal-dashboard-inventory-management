@@ -206,16 +206,11 @@ def generate_new_line_chart(selected_product):
                         title=f'Total Qty Sold - {selected_product}')
     
 
+    logger.info(f'UPDATED FIG - {selected_product}')
+    logger.info(f'UPDATED FIG DF LENGTH - {len(filtered_df)}')
+
 
     return fig
-
-
-
-    
-
-
-    
-
 
 
 if __name__ == '__main__':
