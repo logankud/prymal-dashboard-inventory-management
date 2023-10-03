@@ -79,6 +79,8 @@ def run_athena_query(query:str, database: str, region:str):
             values = [field['VarCharValue'] for field in row['Data']]
             data.append(dict(zip(column_names, values)))
 
+        logger.info('DATA OBJECT: ')
+
         df = pd.DataFrame(data)
 
         logger.info(f'Length of dataframe returned by Athena: {len(df)}')
@@ -147,6 +149,7 @@ QUERY = f"""SELECT order_date
 # ----
 
 result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
+logger.info(result_df)
 
 # Initialize Dash app
 # ----
