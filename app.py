@@ -172,6 +172,8 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
 # Initialize plot
 # ----
 
+logger.info(f'RESULT_DF DATATYPE: {type(result_df)}')
+logger.info("TESTING")
 filtered_df = result_df.loc[result_df['sku_name']==PRODUCT_LIST[0]]
 
      
