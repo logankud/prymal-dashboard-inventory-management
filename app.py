@@ -185,6 +185,7 @@ app.layout = html.Div([
                  PRODUCT_LIST[0], 
                  id='product-dropdown'
                  ),
+    html.Div(id='dd-output-container'),
     dcc.Graph(id='line-chart',
     figure=fig
           )
@@ -193,24 +194,29 @@ app.layout = html.Div([
 # Define callback to update the line chart based on product selection
 @app.callback(
     Output('line-chart', 'fig'),
+    Output('dd-output-container', 'child'),
     Input('product-dropdown', 'selected_product')
 )
-def generate_new_line_chart(selected_product):
+def update_output(selected_product):
+    return f'You have selected {selected_product}'
 
-    filtered_df = result_df.loc[result_df['sku_name']==selected_product]
+# def generate_new_line_chart(selected_product):
+
+#     filtered_df = result_df.loc[result_df['sku_name']==selected_product]
      
-    # Create the plotly line chart
-    fig = px.line(filtered_df,
-                        x='order_date',
-                        y='qty_sold',
-                        title=f'Total Qty Sold - {selected_product}')
+#     # Create the plotly line chart
+#     fig = px.line(filtered_df,
+#                         x='order_date',
+#                         y='qty_sold',
+#                         title=f'Total Qty Sold - {selected_product}')
     
 
-    logger.info(f'UPDATED FIG - {selected_product}')
-    logger.info(f'UPDATED FIG DF LENGTH - {len(filtered_df)}')
+#     logger.info(f'UPDATED FIG - {selected_product}')
+#     logger.info(f'UPDATED FIG DF LENGTH - {len(filtered_df)}')
 
 
-    return fig
+#     return fig
+
 
 
 if __name__ == '__main__':
