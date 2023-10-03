@@ -58,10 +58,8 @@ def run_athena_query(query:str, database: str, region:str):
 
                 if state == 'FAILED':
                     logger.error('Query Failed!')
-                    return False
                 elif state == 'SUCCEEDED':
                     logger.info('Query Succeeded!')
-                    return True
             
 
         # Retrieve the results
@@ -79,13 +77,10 @@ def run_athena_query(query:str, database: str, region:str):
             values = [field['VarCharValue'] for field in row['Data']]
             data.append(dict(zip(column_names, values)))
 
-        logger.info('DATA OBJECT: ')
 
         df = pd.DataFrame(data)
 
         logger.info(f'Length of dataframe returned by Athena: {len(df)}')
-
-        logger.info(f'DATAFRAME HEAD: {df.head()}')
 
         return df
 
@@ -149,7 +144,6 @@ QUERY = f"""SELECT order_date
 # ----
 
 result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
-logger.info(result_df)
 
 # Initialize Dash app
 # ----
@@ -175,8 +169,7 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
 # Initialize plot
 # ----
 
-logger.info(f'RESULT_DF DATATYPE: {type(result_df)}')
-logger.info("TESTING")
+
 filtered_df = result_df.loc[result_df['sku_name']==PRODUCT_LIST[0]]
 
      
@@ -197,24 +190,24 @@ app.layout = html.Div([
           )
 ])
 
-# # Define callback to update the line chart based on product selection
-# @app.callback(
-#     Output('line-chart', 'fig'),
-#     Input('product-dropdown', 'selected_product')
-# )
-# def generate_new_line_chart(selected_product):
+# Define callback to update the line chart based on product selection
+@app.callback(
+    Output('line-chart', 'fig'),
+    Input('product-dropdown', 'selected_product')
+)
+def generate_new_line_chart(selected_product):
 
-#     filtered_df = result_df.loc[result_df['sku_name']==selected_product]
+    filtered_df = result_df.loc[result_df['sku_name']==selected_product]
      
-#     # Create the plotly line chart
-#     fig = px.line(filtered_df,
-#                         x='order_date',
-#                         y='qty_sold',
-#                         title=f'Total Qty Sold - {selected_product}')
+    # Create the plotly line chart
+    fig = px.line(filtered_df,
+                        x='order_date',
+                        y='qty_sold',
+                        title=f'Total Qty Sold - {selected_product}')
     
 
 
-#     return fig
+    return fig
 
 
 
