@@ -15,6 +15,7 @@ import os
 import plotly.express as px
 import plotly.graph_objects as go
 
+
 # ---------------------------------------
 # FUNCTIONS
 # ---------------------------------------
@@ -80,7 +81,9 @@ def run_athena_query(query:str, database: str, region:str):
 
         df = pd.DataFrame(data)
 
-        logger.info(df.head())
+        logger.info(f'Length of dataframe returned by Athena: {len(df)}')
+
+        logger.info(f'DATAFRAME HEAD: {df.head()}')
 
         return df
 
@@ -144,7 +147,6 @@ QUERY = f"""SELECT order_date
 # ----
 
 result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
-logger.info(result_df.head())
 
 # Initialize Dash app
 # ----
@@ -190,24 +192,24 @@ app.layout = html.Div([
           )
 ])
 
-# Define callback to update the line chart based on product selection
-@app.callback(
-    Output('line-chart', 'fig'),
-    Input('product-dropdown', 'selected_product')
-)
-def generate_new_line_chart(selected_product):
+# # Define callback to update the line chart based on product selection
+# @app.callback(
+#     Output('line-chart', 'fig'),
+#     Input('product-dropdown', 'selected_product')
+# )
+# def generate_new_line_chart(selected_product):
 
-    filtered_df = result_df.loc[result_df['sku_name']==selected_product]
+#     filtered_df = result_df.loc[result_df['sku_name']==selected_product]
      
-    # Create the plotly line chart
-    fig = px.line(filtered_df,
-                        x='order_date',
-                        y='qty_sold',
-                        title=f'Total Qty Sold - {selected_product}')
+#     # Create the plotly line chart
+#     fig = px.line(filtered_df,
+#                         x='order_date',
+#                         y='qty_sold',
+#                         title=f'Total Qty Sold - {selected_product}')
     
 
 
-    return fig
+#     return fig
 
 
 
