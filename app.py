@@ -62,23 +62,29 @@ def run_athena_query(query:str, database: str, region:str):
                     logger.info('Query Succeeded!')
             
 
-        # Retrieve the results
-        results_response = athena_client.get_query_results(
-            QueryExecutionId=query_execution_id
+        # Retrieve & Paginate the results
+        paginator = athena_client.get_paginator('get_query_results')
+
+        results_iter = paginator.paginate(
+            QueryExecutionId=query_execution_id,
+            PaginationConfig={
+                'PageSize': 1000
+            }
         )
 
-        # Convert the results to a Pandas DataFrame
-        column_info = results_response['ResultSet']['ResultSetMetadata']['ColumnInfo']
-        column_names = [info['Name'] for info in column_info]
-        rows = results_response['ResultSet']['Rows'][1:]  # Skip the header row
 
-        data = []
-        for row in rows:
-            values = [field['VarCharValue'] for field in row['Data']]
-            data.append(dict(zip(column_names, values)))
+        results = []
+        column_names = None
+        for results_page in results_iter:
+            for row in results_page['ResultSet']['Rows']:
+            column_values = [col.get('VarCharValue', None) for col in row['Data']]
+            if not column_names:
+                column_names = column_values
+            else:
+                results.append(dict(zip(column_names, column_values)))
+                    
 
-
-        df = pd.DataFrame(data)
+        df = pd.DataFrame(results)
 
         logger.info(f'Length of dataframe returned by Athena: {len(df)}')
 
