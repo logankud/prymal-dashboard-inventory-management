@@ -213,7 +213,7 @@ def sync_output(selected_value: str):
     
 
     logger.info(f'UPDATED FIG - {selected_value}')
-    logger.info(f'UPDATED FIG DF LENGTH - {len(result_df.loc[result_df['sku_name']==selected_value])}')
+    logger.info(f"UPDATED FIG DF LENGTH - {len(result_df.loc[result_df['sku_name']==selected_value])}")
 
 
     return fig
