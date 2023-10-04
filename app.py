@@ -182,8 +182,8 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
 # Define layout
 app.layout = html.Div([
     html.Header("Prymal Inventory Management Dashboard"),
-    dcc.Dropdown(options=PRODUCT_LIST, 
-                 value=PRODUCT_LIST[0], 
+    dcc.Dropdown(options=df['Type'].unique(), 
+                 value=df['Type'].unique()[0], 
                  id='product-dropdown'
                  ),
     dcc.Graph(id='line-chart')
