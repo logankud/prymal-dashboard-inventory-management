@@ -148,6 +148,10 @@ result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
 result_df['order_date'] = pd.to_datetime(result_df['order_date']).dt.strftime('%Y-%m-%d')
 result_df['qty_sold'] = result_df['qty_sold'].astype(int)
 
+logger.info(f'MIN DATE: {result_df['order_date'].min()}')
+logger.info(f'MAX DATE: {result_df['order_date'].max()}')
+
+
 # mydataset = 'https://raw.githubusercontent.com/plotly/datasets/master/volcano_db.csv'
 
 # df = pd.read_csv(mydataset,encoding='latin')
@@ -196,14 +200,6 @@ app.layout = html.Div([
 )
 def sync_output(selected_value: str):
 
-    # fig = px.scatter_geo(df.loc[df['Type']==selected_value],
-    #                      lat="Latitude",
-    #                      lon="Longitude",
-    #                      size="Elev",
-    #                      hover_name="Volcano Name")
-    
-    # return fig
-
 
     # Create the plotly line chart
     fig = px.line(result_df.loc[result_df['sku_name']==selected_value],
@@ -211,10 +207,11 @@ def sync_output(selected_value: str):
                         y='qty_sold',
                         title=f'Total Qty Sold - {selected_value}')
     
-
+    fig.update_xaxes(title_text='Order Date', type='category')
+    fig.update_yaxes(title_text='Qty Sold')
+    
     logger.info(f'UPDATED FIG - {selected_value}')
     logger.info(f"UPDATED FIG DF LENGTH - {len(result_df.loc[result_df['sku_name']==selected_value])}")
-
 
     return fig
 
