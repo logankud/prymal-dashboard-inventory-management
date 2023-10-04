@@ -125,28 +125,34 @@ def run_athena_query(query:str, database: str, region:str):
 # Execute Code
 # ========================================================================
 
-DATABASE = 'prymal-analytics'
-REGION = 'us-east-1'
+# DATABASE = 'prymal-analytics'
+# REGION = 'us-east-1'
 
-# Construct query to pull data by product
-# ----
+# # Construct query to pull data by product
+# # ----
 
-QUERY = f"""SELECT order_date
-            , sku_name
-            , SUM(qty_sold) as qty_sold 
-            FROM shopify_qty_sold_by_sku_daily 
-            GROUP BY order_date
-            , sku_name
-            ORDER BY order_date ASC
-            """
+# QUERY = f"""SELECT order_date
+#             , sku_name
+#             , SUM(qty_sold) as qty_sold 
+#             FROM shopify_qty_sold_by_sku_daily 
+#             GROUP BY order_date
+#             , sku_name
+#             ORDER BY order_date ASC
+#             """
 
-# Query datalake
-# ----
+# # Query datalake
+# # ----
 
-result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
-# Format datatypes
-result_df['order_date'] = pd.to_datetime(result_df['order_date']).dt.strftime('%Y-%m-%d')
-result_df['qty_sold'] = result_df['qty_sold'].astype(int)
+# result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
+# # Format datatypes
+# result_df['order_date'] = pd.to_datetime(result_df['order_date']).dt.strftime('%Y-%m-%d')
+# result_df['qty_sold'] = result_df['qty_sold'].astype(int)
+
+mydataset = 'https://raw.githubusercontent.com/plotly/datasets/master/volcano_db.csv'
+
+df = pd.read_csv(mydataset,encoding='latin')
+
+df.head()
 
 
 # Initialize Dash app
@@ -175,8 +181,9 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
 
 # Define layout
 app.layout = html.Div([
-    dcc.Dropdown(PRODUCT_LIST, 
-                 PRODUCT_LIST[0], 
+    html.Header("Prymal Inventory Management Dashboard"),
+    dcc.Dropdown(options=PRODUCT_LIST, 
+                 value=PRODUCT_LIST[0], 
                  id='product-dropdown'
                  ),
     dcc.Graph(id='line-chart')
@@ -185,27 +192,36 @@ app.layout = html.Div([
 # Define callback to update the line chart based on product selection
 @app.callback(
     Output('line-chart', 'figure'),
-    Input('product-dropdown', 'selected_product')
+    Input('product-dropdown', 'value')
 )
-def generate_new_line_chart(selected_product: str):
+def sync_output(selected_value: str):
 
-    filtered_df = result_df.loc[result_df['sku_name']==selected_product]
+    fig = px.scatter_geo(df.loc[df['Type']==selected_value],
+                         lat="Latitude",
+                         lon="Longitude",
+                         size="Elev",
+                         hover_name="Volcano Name")
+    
+    return fig
+
+    # filtered_df = result_df.loc[result_df['sku_name']==selected_product]
      
-    # Create the plotly line chart
-    fig = px.line(filtered_df,
-                        x='order_date',
-                        y='qty_sold',
-                        title=f'Total Qty Sold - {selected_product}')
+    # # Create the plotly line chart
+    # fig = px.line(filtered_df,
+    #                     x='order_date',
+    #                     y='qty_sold',
+    #                     title=f'Total Qty Sold - {selected_product}')
     
 
-    logger.info(f'UPDATED FIG - {selected_product}')
-    logger.info(f'UPDATED FIG DF LENGTH - {len(filtered_df)}')
+    # logger.info(f'UPDATED FIG - {selected_product}')
+    # logger.info(f'UPDATED FIG DF LENGTH - {len(filtered_df)}')
 
 
-    return fig
+    # return fig
 
 
 
 if __name__ == '__main__':
     app.run_server(debug=False, host='0.0.0.0', port=8050)
+
     
