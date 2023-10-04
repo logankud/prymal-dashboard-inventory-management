@@ -185,7 +185,7 @@ app.layout = html.Div([
 # Define callback to update the line chart based on product selection
 @app.callback(
     Output('line-chart', 'figure'),
-    Input('product-dropdown', 'selected_product'),
+    Input('product-dropdown', 'selected_product')
 )
 def generate_new_line_chart(selected_product: str):
 
