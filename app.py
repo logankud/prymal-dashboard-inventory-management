@@ -150,6 +150,8 @@ QUERY = f"""SELECT order_date
 # ----
 
 result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
+result_df.columns = ['order_date','sku_name','qty_sold']
+
 # Format datatypes
 result_df['order_date'] = pd.to_datetime(result_df['order_date']).dt.strftime('%Y-%m-%d')
 result_df['qty_sold'] = result_df['qty_sold'].astype(int)
