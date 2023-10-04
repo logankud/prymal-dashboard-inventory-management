@@ -77,7 +77,7 @@ def run_athena_query(query:str, database: str, region:str):
         column_names = None
         for results_page in results_iter:
             for row in results_page['ResultSet']['Rows']:
-            column_values = [col.get('VarCharValue', None) for col in row['Data']]
+                column_values = [col.get('VarCharValue', None) for col in row['Data']]
             if not column_names:
                 column_names = column_values
             else:
