@@ -148,8 +148,8 @@ result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
 result_df['order_date'] = pd.to_datetime(result_df['order_date']).dt.strftime('%Y-%m-%d')
 result_df['qty_sold'] = result_df['qty_sold'].astype(int)
 
-logger.info(f'MIN DATE: {result_df['order_date'].min()}')
-logger.info(f'MAX DATE: {result_df['order_date'].max()}')
+logger.info(f"MIN DATE: {result_df['order_date'].min()}")
+logger.info(f"MAX DATE: {result_df['order_date'].max()}")
 
 
 # mydataset = 'https://raw.githubusercontent.com/plotly/datasets/master/volcano_db.csv'
