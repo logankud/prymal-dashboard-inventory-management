@@ -81,7 +81,7 @@ def run_athena_query(query:str, database: str, region:str):
 
 
 
-        # Extract quuery result data rows
+        # Extract query result data rows
         data_rows = query_results['ResultSet']['Rows'][1:]
 
         print(f'Length of data_rows: {len(data_rows)}')
@@ -105,7 +105,7 @@ def run_athena_query(query:str, database: str, region:str):
 
 
                 # Convert data rows into a list of lists
-                query_results_data.append([[r['VarCharValue'] for r in row['Data']] for row in data_rows])
+                query_results_data.extend([[r['VarCharValue'] for r in row['Data']] for row in data_rows])
 
 
 
