@@ -71,7 +71,6 @@ def run_athena_query(query:str, database: str, region:str):
         query_results = athena_client.get_query_results(QueryExecutionId=query_execution_id,
                                                 MaxResults= 1000)
         
-        logger.info(query_results)
 
 
         # Extract qury result column names into a list  
@@ -84,7 +83,6 @@ def run_athena_query(query:str, database: str, region:str):
         # Extract query result data rows
         data_rows = query_results['ResultSet']['Rows'][1:]
 
-        print(f'Length of data_rows: {len(data_rows)}')
 
 
         # Convert data rows into a list of lists
@@ -179,7 +177,7 @@ logger.info(result_df.head(3))
 logger.info(result_df.info())
 logger.info(f"Count of NULL RECORDS: {len(result_df.loc[result_df['order_date'].isna()])}")
 # Format datatypes
-result_df['order_date'] = pd.to_datetime(result_df['order_date'], format='%Y-%m-%d').strftime('%Y-%m-%d')
+result_df['order_date'] = pd.to_datetime(result_df['order_date']).dt.strftime('%Y-%m-%d')
 result_df['qty_sold'] = result_df['qty_sold'].astype(int)
 
 logger.info(f"MIN DATE: {result_df['order_date'].min()}")
