@@ -6,3 +6,4 @@ loguru
 boto3
 botocore
 plotly
+dateutil
