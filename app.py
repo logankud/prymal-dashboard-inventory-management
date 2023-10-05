@@ -86,7 +86,6 @@ def run_athena_query(query:str, database: str, region:str):
                 column_values = [col['VarCharValue'] for col in row['Data']]
             
                 results.append(dict(zip(column_names, column_values)))
-                logger.info(len(results))
                     
 
         df = pd.DataFrame(results)
