@@ -74,14 +74,19 @@ def run_athena_query(query:str, database: str, region:str):
 
 
         results = []
-        column_names = None
+        
+        
+    
         for results_page in results_iter:
+            
+            column_info = results_page['ResultSet']['ResultSetMetadata']['ColumnInfo']
+            column_names = [info['Name'] for info in column_info]
+            
             for row in results_page['ResultSet']['Rows']:
-                column_values = [col.get('VarCharValue', None) for col in row['Data']]
-            if not column_names:
-                column_names = column_values
-            else:
+                column_values = [col['VarCharValue'] for col in row['Data']]
+            
                 results.append(dict(zip(column_names, column_values)))
+                logger.info(len(results))
                     
 
         df = pd.DataFrame(results)
@@ -158,13 +163,6 @@ result_df['qty_sold'] = result_df['qty_sold'].astype(int)
 
 logger.info(f"MIN DATE: {result_df['order_date'].min()}")
 logger.info(f"MAX DATE: {result_df['order_date'].max()}")
-
-
-# mydataset = 'https://raw.githubusercontent.com/plotly/datasets/master/volcano_db.csv'
-
-# df = pd.read_csv(mydataset,encoding='latin')
-
-# df.head()
 
 
 # Initialize Dash app
