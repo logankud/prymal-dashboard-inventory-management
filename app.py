@@ -176,9 +176,10 @@ result_df.columns = ['order_date','sku_name','qty_sold']
 logger.info(result_df.head(3))
 logger.info(result_df.info())
 logger.info(f"Count of NULL RECORDS: {len(result_df.loc[result_df['order_date'].isna()])}")
-# Format datatypes
+# Format datatypes & new columns
 result_df['order_date'] = pd.to_datetime(result_df['order_date']).dt.strftime('%Y-%m-%d')
 result_df['qty_sold'] = result_df['qty_sold'].astype(int)
+result_df['week'] = pd.to_datetime(result_df['order_date']).dt.strftime('%Y-%W')
 
 logger.info(f"MIN DATE: {result_df['order_date'].min()}")
 logger.info(f"MAX DATE: {result_df['order_date'].max()}")
@@ -210,12 +211,14 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
 
 # Define layout
 app.layout = html.Div([
-    html.Header("Prymal Inventory Management Dashboard"),
+    html.Header("Prymal Inventory Management Dashboard", 
+                style={"textAlign":"center"}),
     dcc.Dropdown(options=PRODUCT_LIST, 
                  value=PRODUCT_LIST[0], 
                  id='product-dropdown'
                  ),
-    dcc.Graph(id='line-chart')
+    dcc.Graph(id='line-chart'),
+    dcc.Graph(id='line-chart-weekly')
 ])
 
 # Define callback to update the line chart based on product selection
@@ -223,7 +226,7 @@ app.layout = html.Div([
     Output('line-chart', 'figure'),
     Input('product-dropdown', 'value')
 )
-def sync_output(selected_value: str):
+def update_daily_fig(selected_value: str):
 
 
     # Create the plotly line chart
@@ -233,6 +236,29 @@ def sync_output(selected_value: str):
                         title=f'Total Qty Sold - {selected_value}')
     
     fig.update_xaxes(title_text='Order Date', type='category')
+    fig.update_yaxes(title_text='Qty Sold')
+    
+    logger.info(f'UPDATED FIG - {selected_value}')
+    logger.info(f"UPDATED FIG DF LENGTH - {len(result_df.loc[result_df['sku_name']==selected_value])}")
+
+    return fig
+
+@app.callback(
+    Output('line-chart-weekly', 'figure'),
+    Input('product-dropdown', 'value')
+)
+def update_daily_fig(selected_value: str):
+
+    weekly_df = result_df.loc[result_df['sku_name']==selected_value].groupby('week',as_index=False)['qty_sold'].sum()
+
+    
+    # Create the plotly line chart
+    fig = px.line(weekly_df,
+                        x='week',
+                        y='qty_sold',
+                        title=f'Total Qty Sold Weekly - {selected_value}')
+    
+    fig.update_xaxes(title_text='Order Week', type='category')
     fig.update_yaxes(title_text='Qty Sold')
     
     logger.info(f'UPDATED FIG - {selected_value}')
