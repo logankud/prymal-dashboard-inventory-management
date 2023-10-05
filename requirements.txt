@@ -6,4 +6,3 @@ loguru
 boto3
 botocore
 plotly
-python-dateutil

@@ -14,7 +14,6 @@ from loguru import logger
 import os
 import plotly.express as px
 import plotly.graph_objects as go
-import dateutil.parser
 
 
 # ---------------------------------------
@@ -63,37 +62,56 @@ def run_athena_query(query:str, database: str, region:str):
                     logger.info('Query Succeeded!')
             
 
-        # Retrieve & Paginate the results
-        paginator = athena_client.get_paginator('get_query_results')
+        # OBTAIN DATA
 
-        results_iter = paginator.paginate(
-            QueryExecutionId=query_execution_id,
-            PaginationConfig={
-                'PageSize': 1000
-            }
-        )
+        # --------------
 
 
-        results = []
+
+        query_results = athena_client.get_query_results(QueryExecutionId=query_execution_id,
+                                                MaxResults= 1000)
         
+        logger.info(query_results)
+
+
+        # Extract qury result column names into a list  
+
+        cols = query_results['ResultSet']['ResultSetMetadata']['ColumnInfo']
+        col_names = [col['Name'] for col in cols]
+
+
+
+        # Extract quuery result data rows
+        data_rows = query_results['ResultSet']['Rows'][1:]
+
+        print(f'Length of data_rows: {len(data_rows)}')
+
+
+        # Convert data rows into a list of lists
+        query_results_data = [[r['VarCharValue'] for r in row['Data']] for row in data_rows]
+
+
+
+        # Paginate Results if necessary
+        while 'NextToken' in query_results:
+                query_results = athena_client.get_query_results(QueryExecutionId=query_execution_id,
+                                                NextToken=query_results['NextToken'],
+                                                MaxResults= 1000)
+
+
+
+                # Extract quuery result data rows
+                data_rows = query_results['ResultSet']['Rows'][1:]
+
+
+                # Convert data rows into a list of lists
+                query_results_data.append([[r['VarCharValue'] for r in row['Data']] for row in data_rows])
+
+
+
+        results_df = pd.DataFrame(query_results_data, columns = col_names)
         
-    
-        for results_page in results_iter:
-            
-            column_info = results_page['ResultSet']['ResultSetMetadata']['ColumnInfo']
-            column_names = [info['Name'] for info in column_info]
-            
-            for row in results_page['ResultSet']['Rows']:
-                column_values = [col['VarCharValue'] for col in row['Data']]
-            
-                results.append(dict(zip(column_names, column_values)))
-                    
-
-        df = pd.DataFrame(results)
-
-        logger.info(f'Length of dataframe returned by Athena: {len(df)}')
-
-        return df
+        return results_df
 
 
     except ParamValidationError as e:
@@ -161,8 +179,7 @@ logger.info(result_df.head(3))
 logger.info(result_df.info())
 logger.info(f"Count of NULL RECORDS: {len(result_df.loc[result_df['order_date'].isna()])}")
 # Format datatypes
-# result_df['order_date'] = pd.to_datetime(result_df['order_date'], format='%Y-%m-%d').strftime('%Y-%m-%d')
-result_df['order_date'] = result_df['order_date'].apply(dateutil.parser.parse)
+result_df['order_date'] = pd.to_datetime(result_df['order_date'], format='%Y-%m-%d').strftime('%Y-%m-%d')
 result_df['qty_sold'] = result_df['qty_sold'].astype(int)
 
 logger.info(f"MIN DATE: {result_df['order_date'].min()}")
