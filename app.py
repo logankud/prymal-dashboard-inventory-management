@@ -156,8 +156,9 @@ QUERY = f"""SELECT order_date
 result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
 result_df.columns = ['order_date','sku_name','qty_sold']
 
+logger.info(result_df.head(3))
 # Format datatypes
-result_df['order_date'] = pd.to_datetime(result_df['order_date']).strftime('%Y-%m-%d')
+result_df['order_date'] = pd.to_datetime(result_df['order_date'], format='%Y-%m-%d').strftime('%Y-%m-%d')
 result_df['qty_sold'] = result_df['qty_sold'].astype(int)
 
 logger.info(f"MIN DATE: {result_df['order_date'].min()}")
