@@ -210,7 +210,8 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
 
 # Define layout
 app.layout = html.Div([
-    html.Header("Prymal Inventory Management Dashboard"),
+    html.Header("Prymal Inventory Management Dashboard", 
+                style={"textAlign":"center"}),
     dcc.Dropdown(options=PRODUCT_LIST, 
                  value=PRODUCT_LIST[0], 
                  id='product-dropdown'
