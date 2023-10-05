@@ -158,7 +158,7 @@ result_df.columns = ['order_date','sku_name','qty_sold']
 
 logger.info(result_df.head(3))
 logger.info(result_df.info())
-logger.info(f'Count of NULL RECORDS: {len(result_df.loc[result_df['order_date'].isna()])}')
+logger.info(f"Count of NULL RECORDS: {len(result_df.loc[result_df['order_date'].isna()])}")
 # Format datatypes
 result_df['order_date'] = pd.to_datetime(result_df['order_date'], format='%Y-%m-%d').strftime('%Y-%m-%d')
 result_df['qty_sold'] = result_df['qty_sold'].astype(int)
