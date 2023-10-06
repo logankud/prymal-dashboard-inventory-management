@@ -274,11 +274,13 @@ def generate_near_future_forecast(selected_value):
     forecast_90 = ['90 day forecast', lower_bound * 90,upper_bound * 90]
 
     # Consolidate into dataframe
-    near_future_forecast = pd.DataFrame([forecast_30, forecast_60, forecast_90],
+    data = pd.DataFrame([forecast_30, forecast_60, forecast_90],
                 columns=['forecast','lower_bound','upper_bound']).set_index('forecast')
 
 
-    return near_future_forecast.to_dict('records')
+    logger.info(f"{data.to_dict('records')}")
+
+    return data.to_dict('records')
 
 # Define callback to update the line chart based on product selection
 @app.callback(
