@@ -220,7 +220,7 @@ app.layout = html.Div([
     dash_table.DataTable(id='forecast-table',
                         columns=[{"name": "25th Percentile", "id": "percentile_25"},
                                  {"name": "Median", "id": "median"},
-                                 {"name": "75th Percentile", "id": "percentile_75"}],
+                                 {"name": "75th Percentile", "id": "percentile_75"}]
 ),
     dcc.Graph(id='line-chart'),
     dcc.Graph(id='line-chart-weekly')
@@ -229,7 +229,7 @@ app.layout = html.Div([
 
 # Define callback to update the line chart based on product selection
 @app.callback(
-    Output('forecast-table', 'rows'),
+    Output('forecast-table', 'data'),
     Input('product-dropdown', 'value')
 )
 def generate_near_future_forecast(selected_value):
@@ -278,13 +278,13 @@ def generate_near_future_forecast(selected_value):
     forecast_90 = ['90 day forecast', lower_bound * 90,upper_bound * 90]
 
     # Consolidate into dataframe
-    data = pd.DataFrame([forecast_30, forecast_60, forecast_90],
+    df = pd.DataFrame([forecast_30, forecast_60, forecast_90],
                 columns=['forecast','lower_bound','upper_bound']).set_index('forecast')
 
 
-    logger.info(f"{data.to_dict('records')}")
+    logger.info(f"{df.to_dict('records')}")s
 
-    return data.to_dict('records')
+    return df.to_dict('records')
 
 # Define callback to update the line chart based on product selection
 @app.callback(
