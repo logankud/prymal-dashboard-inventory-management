@@ -218,9 +218,8 @@ app.layout = html.Div([
                  id='product-dropdown'
                  ),
     dash_table.DataTable(id='forecast-table',
-                        columns=[{"name": "25th Percentile", "id": "percentile_25"},
-                                 {"name": "Median", "id": "median"},
-                                 {"name": "75th Percentile", "id": "percentile_75"}]
+                        columns=[{"name": "Lower Bound", "id": "lower_bound"},
+                                 {"name": "Upper Bound", "id": "upper_bound"}]
 ),
     dcc.Graph(id='line-chart'),
     dcc.Graph(id='line-chart-weekly')
