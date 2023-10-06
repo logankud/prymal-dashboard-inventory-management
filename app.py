@@ -230,6 +230,8 @@ app.layout = html.Div([
 )
 def generate_near_future_forecast(selected_value):
 
+    logger.info(f'UPDATING FORECAST TABLE - {selected_value}')
+
     # DAILY QTY SOLD
     # -----
 
