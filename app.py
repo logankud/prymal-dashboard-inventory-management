@@ -1,4 +1,4 @@
-from dash import Dash, callback, html, dcc
+from dash import Dash, callback, html, dcc, dash_table
 import dash_bootstrap_components as dbc
 import numpy as np
 import pandas as pd
@@ -217,9 +217,66 @@ app.layout = html.Div([
                  value=PRODUCT_LIST[0], 
                  id='product-dropdown'
                  ),
+    dash_table.DataTable(id='forecast-table'),
     dcc.Graph(id='line-chart'),
     dcc.Graph(id='line-chart-weekly')
 ])
+
+
+# Define callback to update the line chart based on product selection
+@app.callback(
+    Output('forecast-table', 'rows'),
+    Input('product-dropdown', 'value')
+)
+def generate_near_future_forecast(selected_value):
+
+    # DAILY QTY SOLD
+    # -----
+
+    # Calculate daily dataframe
+    daily_df = result_df.loc[result_df['sku_name']==selected_value].sort_values('order_date',ascending=False)
+
+    # Calculate statistics for past 7, 14, 30 & 60 days
+    last_7_median = daily_df.head(7)['qty_sold'].median()
+    last_7_p25 = np.percentile(daily_df.head(7)['qty_sold'],25)
+    last_7_p75 = np.percentile(daily_df.head(7)['qty_sold'],75)
+
+    last_14_median = daily_df.head(14)['qty_sold'].median()
+    last_14_p25 = np.percentile(daily_df.head(14)['qty_sold'],25)
+    last_14_p75 = np.percentile(daily_df.head(14)['qty_sold'],75)
+
+    last_30_median = daily_df.head(30)['qty_sold'].median()
+    last_30_p25 = np.percentile(daily_df.head(30)['qty_sold'],25)
+    last_30_p75 = np.percentile(daily_df.head(30)['qty_sold'],75)
+
+    last_60_median = daily_df.head(60)['qty_sold'].median()
+    last_60_p25 = np.percentile(daily_df.head(60)['qty_sold'],25)
+    last_60_p75 = np.percentile(daily_df.head(60)['qty_sold'],75)
+
+    # Consolidate stats
+    recent_stats_df = pd.DataFrame([[last_7_p25, last_7_median, last_7_p75],
+                [last_14_p25, last_14_median, last_14_p75],
+                [last_30_p25, last_30_median, last_30_p75],
+                [last_60_p25, last_60_median, last_60_p75]],
+                columns=['percentile_25','median','percentile_75'])
+
+
+
+    # Calculate median of lower bound (median) and upper bound (75th percentile) 
+    lower_bound = recent_stats_df['median'].median()
+    upper_bound = recent_stats_df['percentile_75'].median()
+
+    # Extrapolate out 30, 60, 90 days
+    forecast_30 = ['30 day forecast', lower_bound * 30,upper_bound * 30]
+    forecast_60 = ['60 day forecast', lower_bound * 60,upper_bound * 60]
+    forecast_90 = ['90 day forecast', lower_bound * 90,upper_bound * 90]
+
+    # Consolidate into dataframe
+    near_future_forecast = pd.DataFrame([forecast_30, forecast_60, forecast_90],
+                columns=['forecast','lower_bound','upper_bound']).set_index('forecast')
+
+
+    return near_future_forecast.to_dict('records')
 
 # Define callback to update the line chart based on product selection
 @app.callback(
