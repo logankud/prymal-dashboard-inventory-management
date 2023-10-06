@@ -218,7 +218,8 @@ app.layout = html.Div([
                  id='product-dropdown'
                  ),
     dash_table.DataTable(id='forecast-table',
-                        columns=[{"name": "Lower Bound", "id": "lower_bound"},
+                        columns=[{"name": "Forecast", "id": "forecast"},
+                                 {"name": "Lower Bound", "id": "lower_bound"},
                                  {"name": "Upper Bound", "id": "upper_bound"}]
 ),
     dcc.Graph(id='line-chart'),
@@ -272,13 +273,13 @@ def generate_near_future_forecast(selected_value):
     upper_bound = recent_stats_df['percentile_75'].median()
 
     # Extrapolate out 30, 60, 90 days
-    forecast_30 = ['30 day forecast', lower_bound * 30,upper_bound * 30]
-    forecast_60 = ['60 day forecast', lower_bound * 60,upper_bound * 60]
-    forecast_90 = ['90 day forecast', lower_bound * 90,upper_bound * 90]
+    forecast_30 = ['30-day forecast', lower_bound * 30,upper_bound * 30]
+    forecast_60 = ['60-day forecast', lower_bound * 60,upper_bound * 60]
+    forecast_90 = ['90-day forecast', lower_bound * 90,upper_bound * 90]
 
     # Consolidate into dataframe
     df = pd.DataFrame([forecast_30, forecast_60, forecast_90],
-                columns=['forecast','lower_bound','upper_bound']).set_index('forecast')
+                columns=['forecast','lower_bound','upper_bound'])
 
 
     logger.info(f"{df.to_dict('records')}")
