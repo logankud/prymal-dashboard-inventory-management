@@ -282,7 +282,7 @@ def generate_near_future_forecast(selected_value):
                 columns=['forecast','lower_bound','upper_bound']).set_index('forecast')
 
 
-    logger.info(f"{df.to_dict('records')}")s
+    logger.info(f"{df.to_dict('records')}")
 
     return df.to_dict('records')
 
