@@ -268,7 +268,7 @@ app.layout = html.Div([
                  id='product-dropdown'
                  ),
     dcc.Graph(id='inventory-on-hand-indicator'),
-    dbc.Alert("Forecasted Stockout Date Range: ", color="warning", id='stockout-date-range'),
+    html.Div(id="stockout-date-alert"),
     # html.Table([
     #     html.Tr([html.Td(['Inventory on Hand']), html.Td(id='inventory_on_hand')])
     # ]),
@@ -347,6 +347,7 @@ app.layout = html.Div([
     Output('inventory-on-hand-indicator', 'figure'),
     Output('stockout-date-range','value'),
     Output('text_stockout_date_range', 'value'),
+    Output("stockout-date-alert", "is_open")
     Input('product-dropdown', 'value')
 )
 def generate_near_future_forecast(selected_value):
@@ -443,7 +444,7 @@ def generate_near_future_forecast(selected_value):
 
     stockout_date_message = f"Forecased Stockout Date Range: {stockout_date_upper} - {stockout_date_lower}"
 
-    return df.to_dict('records'), fig, stockout_date_message, stockout_date_message
+    return df.to_dict('records'), fig, stockout_date_message, stockout_date_message, dbc.Alert(stockout_date_message, dismissable=False)
 
 # Define callback to update the line chart based on product selection
 @app.callback(
