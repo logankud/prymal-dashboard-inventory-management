@@ -434,9 +434,9 @@ def generate_near_future_forecast(selected_value):
     stockout_date_lower = pd.to_datetime(pd.to_datetime('today') + timedelta(stockout_days_lower)).strftime('%Y-%m-%d')
     stockout_date_upper = pd.to_datetime(pd.to_datetime('today') + timedelta(stockout_days_upper)).strftime('%Y-%m-%d')
 
-    logger.info(f"Expected stockout date for {selected_value}: {stockout_days_upper} - {stockout_date_lower}")
+    logger.info(f"Expected stockout date for {selected_value}: {stockout_date_upper} - {stockout_date_lower}")
 
-    stockout_date_message = f"Expected stockout date range: {stockout_days_upper} - {stockout_date_lower}"
+    stockout_date_message = f"Expected stockout date range: {stockout_date_upper} - {stockout_date_lower}"
 
     return df.to_dict('records') , inventory_on_hand , stockout_date_message
 
