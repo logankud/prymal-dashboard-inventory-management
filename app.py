@@ -347,7 +347,7 @@ app.layout = html.Div([
     Output('inventory-on-hand-indicator', 'figure'),
     Output('stockout-date-range','value'),
     Output('text_stockout_date_range', 'value'),
-    Output("stockout-date-alert", "is_open")
+    Output("stockout-date-alert", "is_open"),
     Input('product-dropdown', 'value')
 )
 def generate_near_future_forecast(selected_value):
