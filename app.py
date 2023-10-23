@@ -267,7 +267,7 @@ app.layout = html.Div([
                  id='product-dropdown'
                  ),
     html.Table([
-        html.Tr([html.Td(['x', html.Sup(2)]), html.Td(id='inventory_on_hand')])
+        html.Tr([html.Td(['Inventory on Hand']), html.Td(id='inventory_on_hand')])
     ]),
     dcc.Textarea(
         id='text_stockout_date_range',
@@ -431,8 +431,8 @@ def generate_near_future_forecast(selected_value):
     stockout_days_upper =inventory_on_hand / upper_bound
 
 
-    stockout_date_lower = pd.to_datetime(pd.to_datetime('today') + timedelta(stockout_days_lower)).dt.strftime('%Y-%m-%d')
-    stockout_date_upper = pd.to_datetime(pd.to_datetime('today') + timedelta(stockout_days_upper)).dt.strftime('%Y-%m-%d')
+    stockout_date_lower = pd.to_datetime(pd.to_datetime('today') + timedelta(stockout_days_lower)).strftime('%Y-%m-%d')
+    stockout_date_upper = pd.to_datetime(pd.to_datetime('today') + timedelta(stockout_days_upper)).strftime('%Y-%m-%d')
 
     logger.info(f"Expected stockout date for {selected_value}: {stockout_days_upper} - {stockout_date_lower}")
 
