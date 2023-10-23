@@ -203,7 +203,7 @@ QUERY =f"""with inventory AS (
         , name
         , total_fulfillable_quantity
         FROM shipbob_inventory 
-        WHERE partition_date = CAST(current_date AS VARCHAR)
+        WHERE partition_date = CAST(DATE(CAST(current_date AS TIMESTAMP) - interval '4' hour) AS VARCHAR)
         )
 
 
