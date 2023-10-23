@@ -334,7 +334,7 @@ def generate_expected_stockout_date(selected_value):
     # CURRENT INVENTORY ON HAND
     # -----
 
-    inventory_on_hand = inventory_df.loc[inventory_df['sku']==selected_sku,'total_fulfillable_quantity'].values[0]
+    inventory_on_hand = inventory_df.loc[inventory_df['sku']==selected_sku,'inventory_on_hand'].values[0]
 
     # CALCULATE EXPECTED STOCKOUT DATE RANGE
 
