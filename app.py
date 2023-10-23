@@ -284,60 +284,6 @@ app.layout = html.Div([
 ])
 
 
-# app.layout = dash.html.Div(
-#     [
-#         dbc.Row(
-#             html.Header("Prymal Inventory Management Dashboard", 
-#                 style={"textAlign":"center"}),
-
-#         ),
-#         dbc.Row(
-#             [
-#                 dbc.Col(
-#                     dbc.Row(
-#                         [
-#                             dash.html.Label("SELECT A PRODUCT:"),
-#                             dcc.Dropdown(options=PRODUCT_LIST, 
-#                                 value=PRODUCT_LIST[0], 
-#                                 id='product-dropdown'
-#                                 )
-#                         ],
-#                         justify="center",
-#                     ),
-#                 ),
-#                 dbc.Col(
-#                     dbc.Row(
-#                         [
-#                             html.Table([
-#                                 html.Tr([html.Td(['Inventory on Hand']), html.Td(id='inventory_on_hand')])
-#                             ]),
-#                         ],
-#                         justify="center",
-#                     ),
-#                 ),
-#             ],
-#             justify="center",
-#         ),
-        # dbc.Row(
-        #     dcc.Textarea(
-        #             id='text_stockout_date_range',
-        #             value='Forecasted stockout date range: ',
-        #             style={'textAlign':'center','width': '100%', 'height': 50},
-        #         ),
-        #     dash_table.DataTable(id='forecast-table',
-        #                             columns=[{"name": "Forecast", "id": "forecast"},
-        #                                     {"name": "Lower Bound", "id": "lower_bound"},
-        #                                     {"name": "Upper Bound", "id": "upper_bound"}]
-        #         ),
-        #     dcc.Graph(id='line-chart'),
-        #     dcc.Graph(id='line-chart-weekly')
-
-        # ),
-#     ],
-#     style={"font-family": "Arial", "font-size": "0.9em", "text-align": "center"},
-# )
-
-
 # Define callback to update the line chart based on product selection
 @app.callback(
     Output('forecast-table', 'data'),
@@ -427,6 +373,8 @@ def generate_near_future_forecast(selected_value):
                         }
                     }
                 )
+    
+    fig.update_layout(width=200,height=200)
 
     # CALCULATE EXPECTED STOCKOUT DATE RANGE
 
