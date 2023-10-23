@@ -14,6 +14,7 @@ from loguru import logger
 import os
 import plotly.express as px
 import plotly.graph_objects as go
+from datetime import timedelta
 
 
 # ---------------------------------------
@@ -159,19 +160,23 @@ REGION = 'us-east-1'
 # ----
 
 QUERY = f"""SELECT order_date
+            , sku
             , sku_name
             , SUM(qty_sold) as qty_sold 
             FROM shopify_qty_sold_by_sku_daily 
+            
+            WHERE partition_date >= DATE(current_date - interval '120' day)
             GROUP BY order_date
+            , sku
             , sku_name
             ORDER BY order_date ASC
             """
 
-# Query datalake
+# Query datalake to get quantiy sold per sku for the last 120 days
 # ----
 
 result_df = run_athena_query(query=QUERY, database=DATABASE, region=REGION)
-result_df.columns = ['order_date','sku_name','qty_sold']
+result_df.columns = ['order_date','sku','sku_name','qty_sold']
 
 logger.info(result_df.head(3))
 logger.info(result_df.info())
@@ -185,6 +190,48 @@ logger.info(f"MIN DATE: {result_df['order_date'].min()}")
 logger.info(f"MAX DATE: {result_df['order_date'].max()}")
 
 
+# Create dataframe of skus sold in the time range
+skus_sold_df = result_df.loc[~result_df['sku_name'].isna(),['sku','sku_name']].drop_duplicates()
+
+
+# Construct query to pull latest inventory details 
+# ----
+
+QUERY =f"""with inventory AS (
+
+        SELECT CAST(sku AS VARCHAR) as sku
+        , name
+        , total_fulfillable_quantity
+        FROM shipbob_inventory 
+        WHERE partition_date = CAST(current_date AS VARCHAR)
+        )
+
+
+        SELECT CASE WHEN sku IS NULL THEN 'Not Reported'
+            ELSE sku end as sku
+        , name
+        , SUM(total_fulfillable_quantity)
+        FROM inventory 
+        GROUP BY CASE WHEN sku IS NULL THEN 'Not Reported'
+            ELSE sku end 
+        , name
+
+                    """
+
+# Query datalake to get current inventory details for skus sold in the last 120 days
+# ----
+
+inventory_df = run_athena_query(query=QUERY, database='prymal', region=REGION)
+inventory_df.columns = ['sku','name','inventory_on_hand']
+
+logger.info(inventory_df.head(3))
+logger.info(inventory_df.info())
+
+# Format datatypes & new columns
+inventory_df['inventory_on_hand'] = inventory_df['inventory_on_hand'].astype(int)
+
+
+
 # Initialize Dash app
 # ----
 
@@ -194,6 +241,8 @@ app = dash.Dash(__name__)
 # ----
 
 server = app.server 
+
+
 
 # QUery product options from Glue database
 # ----
@@ -217,6 +266,11 @@ app.layout = html.Div([
                  value=PRODUCT_LIST[0], 
                  id='product-dropdown'
                  ),
+    dcc.Textarea(
+        id='text_stockout_date_range',
+        value='Forecasted stockout date range: ',
+        style={'width': '100%', 'height': 300},
+    ),
     dash_table.DataTable(id='forecast-table',
                         columns=[{"name": "Forecast", "id": "forecast"},
                                  {"name": "Lower Bound", "id": "lower_bound"},
@@ -226,6 +280,76 @@ app.layout = html.Div([
     dcc.Graph(id='line-chart-weekly')
 ])
 
+# Define callback to update the line chart based on product selection
+@app.callback(
+    Output('text_stockout_date_range', 'value'),
+    Input('product-dropdown', 'value')
+)
+def generate_expected_stockout_date(selected_value):
+
+
+    logger.info(f'CALCULATING DAILY QTY SOLD - {selected_value}')
+
+
+    # DAILY QTY SOLD
+    # -----
+
+    # Calculate daily dataframe
+    daily_df = result_df.loc[result_df['sku_name']==selected_value].sort_values('order_date',ascending=False)
+
+    # Calculate statistics for past 7, 14, 30 & 60 days
+    last_7_median = daily_df.head(7)['qty_sold'].median()
+    last_7_p25 = np.percentile(daily_df.head(7)['qty_sold'],25)
+    last_7_p75 = np.percentile(daily_df.head(7)['qty_sold'],75)
+
+    last_14_median = daily_df.head(14)['qty_sold'].median()
+    last_14_p25 = np.percentile(daily_df.head(14)['qty_sold'],25)
+    last_14_p75 = np.percentile(daily_df.head(14)['qty_sold'],75)
+
+    last_30_median = daily_df.head(30)['qty_sold'].median()
+    last_30_p25 = np.percentile(daily_df.head(30)['qty_sold'],25)
+    last_30_p75 = np.percentile(daily_df.head(30)['qty_sold'],75)
+
+    last_60_median = daily_df.head(60)['qty_sold'].median()
+    last_60_p25 = np.percentile(daily_df.head(60)['qty_sold'],25)
+    last_60_p75 = np.percentile(daily_df.head(60)['qty_sold'],75)
+
+    # Consolidate stats
+    recent_stats_df = pd.DataFrame([[last_7_p25, last_7_median, last_7_p75],
+                [last_14_p25, last_14_median, last_14_p75],
+                [last_30_p25, last_30_median, last_30_p75],
+                [last_60_p25, last_60_median, last_60_p75]],
+                columns=['percentile_25','median','percentile_75'])
+
+
+
+    # Calculate median of lower bound (median) and upper bound (75th percentile) 
+    lower_bound = recent_stats_df['median'].median()
+    upper_bound = recent_stats_df['percentile_75'].median()
+
+    logger.info(f'SUBSETTING INVENTORY TABLE - {selected_value}')
+
+    selected_sku = skus_sold_df.loc[skus_sold_df['sku_name']==selected_value,'sku'].values[0]
+
+    # CURRENT INVENTORY ON HAND
+    # -----
+
+    inventory_on_hand = inventory_df.loc[inventory_df['sku']==selected_sku,'total_fulfillable_quantity'].values[0]
+
+    # CALCULATE EXPECTED STOCKOUT DATE RANGE
+
+    stockout_days_lower = inventory_on_hand / lower_bound
+    stockout_days_upper =inventory_on_hand / upper_bound
+
+
+    stockout_date_lower = pd.to_datetime('today') + timedelta(stockout_days_lower)
+    stockout_date_upper = pd.to_datetime('today') + timedelta(stockout_days_upper)
+
+    logger.info(f"Expected stockout date for {selected_value}: {stockout_date_lower} - {stockout_date_upper}")
+
+    stockout_date_message = f"Expected stockout date for {selected_value}: {stockout_date_lower} - {stockout_date_upper}"
+
+    return stockout_date_message
 
 # Define callback to update the line chart based on product selection
 @app.callback(
