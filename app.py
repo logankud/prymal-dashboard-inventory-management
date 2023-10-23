@@ -268,12 +268,12 @@ app.layout = html.Div([
                  id='product-dropdown'
                  ),
     dcc.Graph(id='inventory-on-hand-indicator'),
-    # html.Div(id="stockout-date-alert"),
-    dcc.Textarea(
-        id='text_stockout_date_range',
-        value='Forecasted stockout date range: ',
-        style={'textAlign':'center','width': '100%', 'height': 50},
-    ),
+    html.Div(id="stockout-date-alert"),
+    # dcc.Textarea(
+    #     id='text_stockout_date_range',
+    #     value='Forecasted stockout date range: ',
+    #     style={'textAlign':'center','width': '100%', 'height': 50},
+    # ),
     dash_table.DataTable(id='forecast-table',
                         columns=[{"name": "Forecast", "id": "forecast"},
                                  {"name": "Lower Bound", "id": "lower_bound"},
@@ -290,7 +290,7 @@ app.layout = html.Div([
     Output('inventory-on-hand-indicator', 'figure'),
     # Output('stockout-date-range','value'),
     Output('text_stockout_date_range', 'value'),
-    # Output("stockout-date-alert", "is_open"),
+    Output("stockout-date-alert", "children"),
     Input('product-dropdown', 'value')
 )
 def generate_near_future_forecast(selected_value):
@@ -389,7 +389,7 @@ def generate_near_future_forecast(selected_value):
 
     stockout_date_message = f"Forecased Stockout Date Range: {stockout_date_upper} - {stockout_date_lower}"
 
-    return df.to_dict('records'), fig, stockout_date_message
+    return df.to_dict('records'), fig, stockout_date_message, stockout_date_message
 
 
 # Define callback to update the line chart based on product selection
