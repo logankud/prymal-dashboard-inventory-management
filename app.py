@@ -357,7 +357,7 @@ app.layout = html.Div([
 # Define callback to update the line chart based on product selection
 @app.callback(
     Output('forecast-table', 'data'),
-    Output('inventory_on_hand', 'value'),
+    Output('inventory_on_hand', 'children'),
     Output('text_stockout_date_range', 'value'),
     Input('product-dropdown', 'value')
 )
@@ -425,6 +425,8 @@ def generate_near_future_forecast(selected_value):
 
     inventory_on_hand = inventory_df.loc[inventory_df['sku']==selected_sku,'inventory_on_hand'].values[0]
 
+    logger.info(f'INVENTORY ON HAND: {inventory_on_hand}')
+
     # CALCULATE EXPECTED STOCKOUT DATE RANGE
 
     stockout_days_lower = inventory_on_hand / lower_bound
@@ -434,11 +436,11 @@ def generate_near_future_forecast(selected_value):
     stockout_date_lower = pd.to_datetime(pd.to_datetime('today') + timedelta(stockout_days_lower)).strftime('%Y-%m-%d')
     stockout_date_upper = pd.to_datetime(pd.to_datetime('today') + timedelta(stockout_days_upper)).strftime('%Y-%m-%d')
 
-    logger.info(f"Expected stockout date for {selected_value}: {stockout_days_upper} - {stockout_date_lower}")
+    logger.info(f"Expected stockout date for {selected_value}: {stockout_date_upper} - {stockout_date_lower}")
 
-    stockout_date_message = f"Expected stockout date range: {stockout_days_upper} - {stockout_date_lower}"
+    stockout_date_message = f"Expected stockout date range: {stockout_date_upper} - {stockout_date_lower}"
 
-    return df.to_dict('records') , inventory_on_hand , stockout_date_message
+    return df.to_dict('records'), inventory_on_hand, stockout_date_message
 
 # Define callback to update the line chart based on product selection
 @app.callback(
