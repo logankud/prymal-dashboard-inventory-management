@@ -374,7 +374,7 @@ def generate_near_future_forecast(selected_value):
                     }
                 )
     
-    fig.update_layout(width=200,height=200)
+    fig.update_layout(height=200)
 
     # CALCULATE EXPECTED STOCKOUT DATE RANGE
 
