@@ -324,21 +324,21 @@ app.layout = dash.html.Div(
             ],
             justify="center",
         ),
-        dbc.Row(
-            dcc.Textarea(
-                id='text_stockout_date_range',
-                value='Forecasted stockout date range: ',
-                style={'textAlign':'center','width': '100%', 'height': 50},
-            ),
-            dash_table.DataTable(id='forecast-table',
-                                columns=[{"name": "Forecast", "id": "forecast"},
-                                        {"name": "Lower Bound", "id": "lower_bound"},
-                                        {"name": "Upper Bound", "id": "upper_bound"}]
-            ),
-            dcc.Graph(id='line-chart'),
-            dcc.Graph(id='line-chart-weekly')
+        # dbc.Row(
+        #     dcc.Textarea(
+        #             id='text_stockout_date_range',
+        #             value='Forecasted stockout date range: ',
+        #             style={'textAlign':'center','width': '100%', 'height': 50},
+        #         ),
+        #     dash_table.DataTable(id='forecast-table',
+        #                             columns=[{"name": "Forecast", "id": "forecast"},
+        #                                     {"name": "Lower Bound", "id": "lower_bound"},
+        #                                     {"name": "Upper Bound", "id": "upper_bound"}]
+        #         ),
+        #     dcc.Graph(id='line-chart'),
+        #     dcc.Graph(id='line-chart-weekly')
 
-        ),
+        # ),
     ],
     style={"font-family": "Arial", "font-size": "0.9em", "text-align": "center"},
 )
