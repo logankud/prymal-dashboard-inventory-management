@@ -259,100 +259,90 @@ PRODUCT_LIST = ['Salted Caramel - Large Bag (320 g)',
 # ----
 
 # Define layout
-app.layout = html.Div([
-    html.Header("Prymal Inventory Management Dashboard", 
+# app.layout = html.Div([
+#                 dbc.Row([
+#                     dbc.Col(
+#                         dbc.Row(
+#                         )
+#                     )
+#                 ])
+#     html.Header("Prymal Inventory Management Dashboard", 
+#                 style={"textAlign":"center"}),
+#     dcc.Dropdown(options=PRODUCT_LIST, 
+#                  value=PRODUCT_LIST[0], 
+#                  id='product-dropdown'
+#                  ),
+#     html.Table([
+#         html.Tr([html.Td(['Inventory on Hand']), html.Td(id='inventory_on_hand')])
+#     ]),
+#     dcc.Textarea(
+#         id='text_stockout_date_range',
+#         value='Forecasted stockout date range: ',
+#         style={'textAlign':'center','width': '100%', 'height': 50},
+#     ),
+#     dash_table.DataTable(id='forecast-table',
+#                         columns=[{"name": "Forecast", "id": "forecast"},
+#                                  {"name": "Lower Bound", "id": "lower_bound"},
+#                                  {"name": "Upper Bound", "id": "upper_bound"}]
+# ),
+#     dcc.Graph(id='line-chart'),
+#     dcc.Graph(id='line-chart-weekly')
+# ])
+
+
+app.layout = dash.html.Div(
+    [
+        dbc.Row(
+            html.Header("Prymal Inventory Management Dashboard", 
                 style={"textAlign":"center"}),
-    dcc.Dropdown(options=PRODUCT_LIST, 
-                 value=PRODUCT_LIST[0], 
-                 id='product-dropdown'
-                 ),
-    html.Table([
-        html.Tr([html.Td(['Inventory on Hand']), html.Td(id='inventory_on_hand')])
-    ]),
-    dcc.Textarea(
-        id='text_stockout_date_range',
-        value='Forecasted stockout date range: ',
-        style={'textAlign':'center','width': '100%', 'height': 50},
-    ),
-    dash_table.DataTable(id='forecast-table',
-                        columns=[{"name": "Forecast", "id": "forecast"},
-                                 {"name": "Lower Bound", "id": "lower_bound"},
-                                 {"name": "Upper Bound", "id": "upper_bound"}]
-),
-    dcc.Graph(id='line-chart'),
-    dcc.Graph(id='line-chart-weekly')
-])
 
-# # Define callback to update the line chart based on product selection
-# @app.callback(
-#     Output('text_stockout_date_range', 'value'),
-#     Input('product-dropdown', 'value')
-# )
-# def generate_expected_stockout_date(selected_value):
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Row(
+                        [
+                            dash.html.Label("SELECT A PRODUCT:"),
+                            dcc.Dropdown(options=PRODUCT_LIST, 
+                                value=PRODUCT_LIST[0], 
+                                id='product-dropdown'
+                                )
+                        ],
+                        justify="center",
+                    ),
+                ),
+                dbc.Col(
+                    dbc.Row(
+                        [
+                            html.Table([
+                                html.Tr([html.Td(['Inventory on Hand']), html.Td(id='inventory_on_hand')])
+                            ]),
+                        ],
+                        justify="center",
+                    ),
+                ),
+            ],
+            justify="center",
+        ),
+        dbc.Row(
+            dcc.Textarea(
+                id='text_stockout_date_range',
+                value='Forecasted stockout date range: ',
+                style={'textAlign':'center','width': '100%', 'height': 50},
+            ),
+            dash_table.DataTable(id='forecast-table',
+                                columns=[{"name": "Forecast", "id": "forecast"},
+                                        {"name": "Lower Bound", "id": "lower_bound"},
+                                        {"name": "Upper Bound", "id": "upper_bound"}]
+            ),
+            dcc.Graph(id='line-chart'),
+            dcc.Graph(id='line-chart-weekly')
 
+        ),
+    ],
+    style={"font-family": "Arial", "font-size": "0.9em", "text-align": "center"},
+)
 
-#     logger.info(f'CALCULATING DAILY QTY SOLD - {selected_value}')
-
-
-#     # DAILY QTY SOLD
-#     # -----
-
-#     # Calculate daily dataframe
-#     daily_df = result_df.loc[result_df['sku_name']==selected_value].sort_values('order_date',ascending=False)
-
-#     # Calculate statistics for past 7, 14, 30 & 60 days
-#     last_7_median = daily_df.head(7)['qty_sold'].median()
-#     last_7_p25 = np.percentile(daily_df.head(7)['qty_sold'],25)
-#     last_7_p75 = np.percentile(daily_df.head(7)['qty_sold'],75)
-
-#     last_14_median = daily_df.head(14)['qty_sold'].median()
-#     last_14_p25 = np.percentile(daily_df.head(14)['qty_sold'],25)
-#     last_14_p75 = np.percentile(daily_df.head(14)['qty_sold'],75)
-
-#     last_30_median = daily_df.head(30)['qty_sold'].median()
-#     last_30_p25 = np.percentile(daily_df.head(30)['qty_sold'],25)
-#     last_30_p75 = np.percentile(daily_df.head(30)['qty_sold'],75)
-
-#     last_60_median = daily_df.head(60)['qty_sold'].median()
-#     last_60_p25 = np.percentile(daily_df.head(60)['qty_sold'],25)
-#     last_60_p75 = np.percentile(daily_df.head(60)['qty_sold'],75)
-
-#     # Consolidate stats
-#     recent_stats_df = pd.DataFrame([[last_7_p25, last_7_median, last_7_p75],
-#                 [last_14_p25, last_14_median, last_14_p75],
-#                 [last_30_p25, last_30_median, last_30_p75],
-#                 [last_60_p25, last_60_median, last_60_p75]],
-#                 columns=['percentile_25','median','percentile_75'])
-
-
-
-#     # Calculate median of lower bound (median) and upper bound (75th percentile) 
-#     lower_bound = recent_stats_df['median'].median()
-#     upper_bound = recent_stats_df['percentile_75'].median()
-
-#     logger.info(f'SUBSETTING INVENTORY TABLE - {selected_value}')
-
-#     selected_sku = skus_sold_df.loc[skus_sold_df['sku_name']==selected_value,'sku'].values[0]
-
-#     # CURRENT INVENTORY ON HAND
-#     # -----
-
-#     inventory_on_hand = inventory_df.loc[inventory_df['sku']==selected_sku,'inventory_on_hand'].values[0]
-
-#     # CALCULATE EXPECTED STOCKOUT DATE RANGE
-
-#     stockout_days_lower = inventory_on_hand / lower_bound
-#     stockout_days_upper =inventory_on_hand / upper_bound
-
-
-#     stockout_date_lower = pd.to_datetime(pd.to_datetime('today') + timedelta(stockout_days_lower)).dt.strftime('%Y-%m-%d')
-#     stockout_date_upper = pd.to_datetime(pd.to_datetime('today') + timedelta(stockout_days_upper)).dt.strftime('%Y-%m-%d')
-
-#     logger.info(f"Expected stockout date for {selected_value}: {stockout_days_upper} - {stockout_date_lower}")
-
-#     stockout_date_message = f"Expected stockout date range: {stockout_days_upper} - {stockout_date_lower}"
-
-#     return stockout_date_message
 
 # Define callback to update the line chart based on product selection
 @app.callback(
