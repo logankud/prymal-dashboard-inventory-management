@@ -235,7 +235,7 @@ inventory_df['inventory_on_hand'] = inventory_df['inventory_on_hand'].astype(int
 # Initialize Dash app
 # ----
 
-app = dash.Dash(__name__,external_stylesheets=[dbc.themes.SANDSTONE])
+app = dash.Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Reference the underlying flask app (Used by gunicorn webserver in Heroku production deployment)
 # ----
@@ -288,8 +288,6 @@ app.layout = html.Div([
 @app.callback(
     Output('forecast-table', 'data'),
     Output('inventory-on-hand-indicator', 'figure'),
-    # Output('stockout-date-range','value'),
-    Output('text_stockout_date_range', 'value'),
     Output("stockout-date-alert", "children"),
     Input('product-dropdown', 'value')
 )
@@ -389,7 +387,8 @@ def generate_near_future_forecast(selected_value):
 
     stockout_date_message = f"Forecased Stockout Date Range: {stockout_date_upper} - {stockout_date_lower}"
 
-    return df.to_dict('records'), fig, stockout_date_message, stockout_date_message
+    return df.to_dict('records'), fig, stockout_date_message
+
 
 
 # Define callback to update the line chart based on product selection
