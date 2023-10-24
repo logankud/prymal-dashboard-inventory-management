@@ -267,11 +267,12 @@ app.layout = html.Div([
                  value=PRODUCT_LIST[0], 
                  id='product-dropdown'
                  ),
-    dcc.Graph(id='inventory-on-hand-indicator'),
     html.Div(id="stockout-date-alert",
              style={
             'textAlign': 'center'
             }),
+    dcc.Graph(id='inventory-on-hand-indicator'),
+    
     # dcc.Textarea(
     #     id='text_stockout_date_range',
     #     value='Forecasted stockout date range: ',
