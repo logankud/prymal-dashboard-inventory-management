@@ -269,11 +269,11 @@ app.layout = html.Div([
                  ),
     dcc.Graph(id='inventory-on-hand-indicator'),
     html.Div(id="stockout-date-alert"),
-    # dcc.Textarea(
-    #     id='text_stockout_date_range',
-    #     value='Forecasted stockout date range: ',
-    #     style={'textAlign':'center','width': '100%', 'height': 50},
-    # ),
+    dcc.Textarea(
+        id='text_stockout_date_range',
+        value='Forecasted stockout date range: ',
+        style={'textAlign':'center','width': '100%', 'height': 50},
+    ),
     dash_table.DataTable(id='forecast-table',
                         columns=[{"name": "Forecast", "id": "forecast"},
                                  {"name": "Lower Bound", "id": "lower_bound"},
